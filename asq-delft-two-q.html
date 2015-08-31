@@ -1,0 +1,345 @@
+<link rel='import' href='../polymer/polymer.html'>
+<link rel='import' href='../ace-element/ace-element.html'>
+<link rel='import' href='../iron-flex-layout/iron-flex-layout.html'>
+
+<script src='bower_components/jsPlumb/dist/js/dom.jsPlumb-1.7.8.js'></script>
+
+<!--
+ Show some javascript code and ask students to draw the prototype chain of that code.
+
+
+### Example:
+
+    <asq-delft-two-q>
+      <asq-stem>
+        <h4>Try to recreate the following image using HTML5 and CSS</h4>
+      <asq-stem>
+      <img src='mockup.png' alt='>
+    </asq-delft-two-q>
+
+@group DELFT Elements
+@element asq-delft-two-q
+@demo demo/index.html
+-->
+<dom-module id='asq-delft-two-q'>
+
+  <style>
+    :host {
+      /*@apply(--layout-vertical);*/
+      min-height:500px;
+      display: block;
+      box-sizing: border-box;
+      position:relative;
+    }
+
+    #toolbar {
+      height:40px;
+      background: #f0f0f0;
+      @apply(--layout-horizontal);
+      @apply(--layout-center);
+    }
+
+    .toolbar-btn{
+      height: 30px;
+    }
+
+    #canvas {
+      /*@apply(--layout-flex);*/
+    }
+
+    .canvas {
+      height: 550px;
+      max-height: 700px;
+      border: 1px solid #CCC;
+      background-color: white;
+      position:relative;
+    }
+    .jtk-surface-nopan {
+      overflow: scroll !important;
+      cursor: default;
+    }
+    .jtk-surface {
+      overflow: hidden !important;
+      position: relative;
+      cursor: move;
+      cursor: -moz-grab;
+      cursor: -webkit-grab;
+      touch-action: none;
+    }
+
+    /** ELEMENT POSITIONS **/
+    #el1 { top:76px; left:100px; }
+    #el2 { top:148px; left:600px; }
+    #el3 { top:340px; left:100px; }
+    #el4 { top:416px; left:600px; }
+    #el5 { top:316px; left:400px; }
+
+    /** ELEMENTS **/
+    .drag-drop-demo .object,
+    .drag-drop-demo .constructor,
+    .drag-drop-demo .proto {
+      background-color: white;
+      border: 1px solid #555;
+      text-align: center;
+      z-index: 24;
+      cursor: pointer;
+      box-shadow: 2px 2px 19px #aaa;
+      -o-box-shadow: 2px 2px 19px #aaa;
+      -webkit-box-shadow: 2px 2px 19px #aaa;
+      -moz-box-shadow: 2px 2px 19px #aaa;
+      -moz-border-radius: 0.5em;
+      border-radius: 4px;
+      position: absolute;
+      color: black;
+      width: 100px;
+      /*height: 106px;*/
+      line-height: 12px;
+      -webkit-transition: -webkit-box-shadow 0.15s ease-in;
+      -moz-transition: -moz-box-shadow 0.15s ease-in;
+      -o-transition: -o-box-shadow 0.15s ease-in;
+      transition: box-shadow 0.15s ease-in;
+    }
+
+    .object-name,
+    .constructor-name,
+    .proto-name{
+      padding: 20px 5px;
+      color: white;
+      border-top-right-radius: 4px;
+      border-top-left-radius: 4px;
+    }
+
+    .object-name{
+      background: none;
+      color: black;
+    }
+
+    .constructor-name{
+      background: #4E7BA2;
+    }
+
+    .proto-name{
+      background: #EC7F2D;
+    }
+
+    .window:hover {
+      border:1px solid #123456;
+      box-shadow: 2px 2px 19px #444;
+      -o-box-shadow: 2px 2px 19px #444;
+      -webkit-box-shadow: 2px 2px 19px #444;
+      -moz-box-shadow: 2px 2px 19px #fff;
+      opacity:0.9;
+      filter:alpha(opacity=90);
+    }
+
+    .drag-drop-demo a, .drag-drop-demo a:visited {
+      color:#057D9F;
+    }
+
+    .drag-drop-demo a:hover {
+      color:orange;
+    }
+
+    /** LINKS IN WINDOWS **/
+    .drag-locked { border:1px solid red; }
+    .cmdLink { font-size:0.80em;}
+
+    /** DRAG/DROP CLASSES **/
+    .dragActive { border:2px dotted orange; }
+    .dropHover { border:1px dotted red; }
+
+    path, ._jsPlumb_endpoint { cursor:pointer; }
+
+
+
+  </style>
+
+
+  <template>
+    <content></content>
+    <div id='toolbar'>
+      <button on-click='onAddInstanceObject' class='toolbar-btn'>Add an 'instance' Object</button>
+      <button on-click='onAddConstructorFunction'class='toolbar-btn'>Add Constructor Function</button>
+      <button on-click='onAddPrototypeObject' class='toolbar-btn'>Add prototype Object</button>
+    </div>
+    <div class='canvas canvas-wide drag-drop-demo jtk-surface jtk-surface-nopan' id='canvas'>
+      
+    </div>
+
+    <template id='object-template' preserve-content >
+        <div class='object'>
+            <div class='object-name'>new object</div>
+            <div class='object-proto' style='border-top: 1px solid black;padding: 8px 3px;'>__proto__</div>
+        </div>
+    </template>
+    <template id='constructor-template' preserve-content >
+        <div class='constructor'>
+            <div class='constructor-name'>new Constructor function
+            </div>
+            <div class='constructor-prototype' style='border-top: 1px solid black;padding: 8px 3px;'>prototype</div>
+        </div>
+    </template>
+    <template id='proto-template' preserve-content >
+        <div class='proto'>
+            <div class='proto-name'>
+                proto object
+            </div>
+            <div class='proto-constructor' style='border-top: 1px solid black;padding: 8px 3px;'>constructor</div>
+            <div class='proto-proto' style='border-top: 1px solid black;padding: 8px 3px;'>__proto__</div>
+    </template>
+  </template>
+
+</dom-module>
+
+<script>
+
+  (function(){
+
+    // configure some drop options for use by all endpoints.
+    var exampleDropOptions = {
+        tolerance: 'touch',
+        hoverClass: 'dropHover',
+        activeClass: 'dragActive'
+    };
+
+
+    var protoColor = '#EC7F2D';
+    var protoEndpoint = {
+        endpoint: ['Dot', { radius: 8 }],
+        paintStyle: { fillStyle: protoColor },
+        isSource: true,
+        scope: 'protoScope',
+        connectorStyle: { strokeStyle: protoColor, lineWidth: 4 },
+        connector: ['Bezier', { curviness: 63 } ],
+        maxConnections: 1,
+        dropOptions: exampleDropOptions,
+        connectorOverlays:[ 
+            [ 'PlainArrow', { width:10, length:10, location:1, id:'arrow' } ]
+          ],
+    };
+
+    var constructorColor = '#4E7BA2';
+    var constructorEndpoint = {
+        endpoint: ['Dot', { radius: 8 }],
+        paintStyle: { fillStyle: constructorColor },
+        isSource: true,
+        scope: 'constructorScope',
+        connectorStyle: { strokeStyle: constructorColor, lineWidth: 4 },
+        connector: ['Bezier', { curviness: 63 } ],
+        maxConnections: 1,
+        dropOptions: exampleDropOptions,
+        connectorOverlays:[ 
+            [ 'PlainArrow', { width:10, length:10, location:1, id:'arrow' } ]
+          ],
+    };
+
+    Polymer({
+
+      is: 'asq-delft-two-q',
+
+      cnt : 0,
+
+      listeners: {
+        'jsPlumbInitialized': 'onJSPlumbInitialized'
+      },
+
+      ready: function() {
+
+        setTimeout(function(){
+          jsPlumb.ready(this.init.bind(this));
+        }.bind(this), 500);
+      },
+
+      onJSPlumbInitialized: function(){
+        this.onAddInstanceObject();
+        this.onAddConstructorFunction();
+        this.onAddPrototypeObject();
+      },
+
+      // Double-click event handler
+      init: function () {
+
+        this.jsPlumbInstance = jsPlumb.getInstance({
+            DragOptions: { cursor: 'pointer', zIndex: 2000 },
+            PaintStyle: { strokeStyle: '#666' },
+            EndpointHoverStyle: { fillStyle: 'orange' },
+            HoverPaintStyle: { strokeStyle: 'orange' },
+            EndpointStyle: { width: 20, height: 16, strokeStyle: '#666' },
+            Endpoint: 'Rectangle',
+            Anchors: ['TopCenter', 'TopCenter'],
+            Container: this.$.canvas,
+        });
+
+        // suspend drawing and initialise.
+        this.jsPlumbInstance.batch(function () {
+
+            this.jsPlumbInstance.on(document.getElementById('clear'), 'click', function (e) {
+                instance.detachEveryConnection();
+                jsPlumbUtil.consume(e);
+            });
+
+        }.bind(this));
+
+        this.fire('jsPlumbInitialized');
+
+      },
+
+      onAddInstanceObject: function (){
+        var content = document.importNode(this.$['object-template'].content, true);
+        newObject = content.querySelector('.object')
+        newObject.setAttribute('id', 'el' + ++this.cnt);
+        this.$.canvas.appendChild(newObject);
+        var protoLbl = Polymer.dom(newObject).querySelector('.object-proto');
+        this.jsPlumbInstance.addEndpoint(protoLbl, { anchor: 'RightMiddle' }, protoEndpoint);
+        this.jsPlumbInstance.addEndpoint(protoLbl, { anchor: 'LeftMiddle' }, protoEndpoint);
+        this.jsPlumbInstance.draggable(newObject);
+      },
+
+      onAddConstructorFunction: function (){
+        var content = document.importNode(this.$['constructor-template'].content, true);
+        var newConstructor = content.querySelector('.constructor')
+        newConstructor.setAttribute('id', 'el' + ++this.cnt);
+        this.$.canvas.appendChild(newConstructor);
+
+        var prototypeLbl = Polymer.dom(newConstructor).querySelector('.constructor-prototype');
+        this.jsPlumbInstance.addEndpoint(prototypeLbl, { anchor: 'LeftMiddle' }, protoEndpoint);
+        this.jsPlumbInstance.addEndpoint(prototypeLbl, { anchor: 'RightMiddle' }, protoEndpoint);
+
+        var nameLbl = Polymer.dom(newConstructor).querySelector('.constructor-name');
+
+        this.jsPlumbInstance.makeTarget(nameLbl, { 
+            anchor: ['Left', 'Right', 'Top'],
+            endpoint: ['Dot', { radius: 1 }],
+            paintStyle: { fillStyle: constructorColor },
+            scope: 'constructorScope' });
+
+        this.jsPlumbInstance.draggable(newConstructor);
+      },
+
+      onAddPrototypeObject: function(){
+        var content = document.importNode(this.$['proto-template'].content, true);
+        var newObject = content.querySelector('.proto')
+        newObject.setAttribute('id', 'el' + ++this.cnt);
+        this.$.canvas.appendChild(newObject);
+        
+        var constructorLbl = Polymer.dom(newObject).querySelector('.proto-constructor');
+        this.jsPlumbInstance.addEndpoint(constructorLbl, { anchor: ['RightMiddle'] }, constructorEndpoint);
+        this.jsPlumbInstance.addEndpoint(constructorLbl, { anchor: ['LeftMiddle'] }, constructorEndpoint);
+
+        var protoLbl = Polymer.dom(newObject).querySelector('.proto-proto');
+        this.jsPlumbInstance.addEndpoint(protoLbl, { anchor: 'RightMiddle' }, protoEndpoint);
+        this.jsPlumbInstance.addEndpoint(protoLbl, { anchor: 'LeftMiddle' }, protoEndpoint);
+
+        var nameLbl = Polymer.dom(newObject).querySelector('.proto-name');
+        this.jsPlumbInstance.makeTarget(nameLbl, { 
+            anchor: ['Left', 'Right', 'Top'],
+            endpoint: ['Dot', { radius: 1 }],
+            paintStyle: { fillStyle: protoColor },
+            scope: 'protoScope' });
+
+        this.jsPlumbInstance.draggable(newObject);
+      }
+    });
+  })();
+
+</script>

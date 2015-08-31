@@ -1,0 +1,30 @@
+{
+  "name": "asq-delft-two-q",
+  "version": "1.0.0",
+  "authors": [
+    "Vasileios Triglianos <triglian@gmail.com>"
+  ],
+  "description": "Show some javascript code and ask students to draw the prototype chain of that code",
+  "keywords": [
+    "web-component",
+    "polymer",
+    "seed"
+  ],
+  "main": "asq-delft-two-q.html",
+  "license": "MIT",
+  "homepage": "https://github.com/triglian/asq-delft-two-q/",
+  "ignore": [
+    "/.*",
+    "/test/"
+  ],
+  "dependencies": {
+    "ace-element": "triglian/ace-element#master",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#~1.0.2",
+    "jsPlumb": "~1.7.8",
+    "polymer": "Polymer/polymer#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "*"
+  }
+}
